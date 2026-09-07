@@ -25,6 +25,8 @@ class InterpEx extends insanity.backend.Interp
 		
 		this.sharedFields = shareables;
 		addParent(this.parent);
+		
+		safeFunctions = true;
 	}
 	
 	public override function trace(args:Array<Dynamic>):Void
@@ -192,5 +194,12 @@ class InterpEx extends insanity.backend.Interp
 			default:
 				super.expr(e, t, void, mapCompr);
 		}
+	}
+	
+	public override dynamic function onFunctionError(exception:haxe.Exception, functionName:Null<String>, functionId:Int):Void {
+		var pos:haxe.PosInfos = posInfos();
+		pos.methodName = (functionName ?? '#$functionId');
+		
+		funkin.scripts.FunkinScript.log(exception, pos, ERROR);
 	}
 }

@@ -271,13 +271,17 @@ class FunkinScript extends insanity.Script implements IFlxDestroyable
 		set("newShader", newShader);
 	}
 	
-	static inline function formatPosInfos(fileName:String = 'hscript', lineNumber:Int = 0, x:String = '', prefix:String = '')
+	static inline function formatPosInfos(pos:haxe.PosInfos, x:String = '', prefix:String = '')
 	{
-		var prefix = '[$prefix$fileName:$lineNumber]';
+		var fileName:String = (pos.fileName ?? 'hscript');
+		var method:String = (pos.methodName == null ? '' : ':${pos.methodName}');
+		var line:String = (pos.lineNumber < 0 ? '' : ':${pos.lineNumber}');
 		
 		final modPath:String = Paths.mods(Mods.currentModDirectory + '/');
-		if (fileName.startsWith(modPath)) prefix = prefix.replace(modPath, '');
-		#if ASSET_REDIRECT else if (fileName.startsWith(Paths.trail)) prefix = prefix.replace(Paths.trail, ''); #end
+		if (fileName.startsWith(modPath)) fileName = fileName.replace(modPath, '');
+		#if ASSET_REDIRECT else if (fileName.startsWith(Paths.trail)) fileName = fileName.replace(Paths.trail, ''); #end
+		
+		var prefix = '[$prefix$fileName$method$line]';
 		
 		return '$prefix $x';
 	}
@@ -285,7 +289,7 @@ class FunkinScript extends insanity.Script implements IFlxDestroyable
 	public static function log(x:Dynamic, pos:haxe.PosInfos, severity:Severity = PRINT):Void // hey its me severity
 	{
 		final prefix:String = severity.scriptPrefix;
-		var out:String = formatPosInfos(pos.fileName, pos.lineNumber, Std.string(x), prefix.length == 0 ? '' : '$prefix:');
+		var out:String = formatPosInfos(pos, Std.string(x), prefix.length == 0 ? '' : '$prefix:');
 		
 		DebugTextPlugin.addText(out, Logger.getHexColourFromSeverity(severity));
 		
@@ -295,7 +299,7 @@ class FunkinScript extends insanity.Script implements IFlxDestroyable
 			if (severity == FATAL) out = out.attr(INTENSITY_BOLD);
 		}
 		
-		haxe.Log.trace(out, null);
+		Sys.println(out);
 	}
 	
 	override function call(funcToRun:String, ?args:Array<Dynamic>):Any
@@ -307,15 +311,7 @@ class FunkinScript extends insanity.Script implements IFlxDestroyable
 			return null;
 		}
 		
-		var r:Dynamic = null;
-		
-		try {
-			r = Reflect.callMethod(interp, get(funcToRun), args ?? []);
-		} catch (e:haxe.Exception) {
-			log(e, interp.posInfos(), ERROR);
-		}
-		
-		return r;
+		return Reflect.callMethod(interp, get(funcToRun), args ?? []);
 	}
 	
 	static function newShader(?fragFile:String, ?vertFile:String)

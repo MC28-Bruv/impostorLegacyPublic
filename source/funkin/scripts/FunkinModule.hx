@@ -41,17 +41,17 @@ class FunkinModule extends insanity.Module implements IFunkinModule
 		return super.startType(environment, type);
 	}
 	
-	public override dynamic function onProgramError(e:haxe.Exception):Void
+	public override dynamic function onProgramError(exception:haxe.Exception):Void
 	{
-		FunkinScript.log(Std.string(e), interp.posInfos(), FATAL);
+		FunkinScript.log(exception, interp.posInfos(), FATAL);
 	}
-	public override dynamic function onParsingError(e:haxe.Exception):Void
+	public override dynamic function onParsingError(exception:haxe.Exception):Void
 	{
-		FunkinScript.log(Std.string(e), cast {fileName: path, lineNumber: parser.line}, FATAL);
+		FunkinScript.log(exception, cast {fileName: path, lineNumber: parser.line}, FATAL);
 	}
-	public override dynamic function onTypeError(e:haxe.Exception, type:IInsanityType):Void
+	public override dynamic function onTypeError(exception:haxe.Exception, type:IInsanityType):Void
 	{
-		FunkinScript.log(Std.string(e), cast {fileName: type.path, showLine: false}, FATAL);
+		FunkinScript.log(exception, cast {fileName: type.path, lineNumber: -1}, FATAL);
 	}
 	
 	public override function setDefaults():Void
