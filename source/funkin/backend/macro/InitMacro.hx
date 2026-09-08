@@ -44,6 +44,8 @@ class InitMacro
 		Compiler.include('flixel', true, ['flixel.addons.nape.*', 'flixel.addons.editors.*', 'flixel.addons.tile.FlxRayCastTilemap', 'flixel.system.macros']);
 		
 		// hscript
+		Compiler.addGlobalMetadata('', '@:build(insanity.macro.AbstractMacro.build())');
+		
 		Compiler.addGlobalMetadata('flixel', '@:build(insanity.macro.Patcher.patch())');
 		Compiler.addGlobalMetadata('flixel.group', '@:build(insanity.macro.Patcher.patch(true))');
 		Compiler.addGlobalMetadata('flixel.effects', '@:build(insanity.macro.Patcher.patch(true))');

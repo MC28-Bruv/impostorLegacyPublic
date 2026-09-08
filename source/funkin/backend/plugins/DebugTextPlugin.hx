@@ -140,12 +140,13 @@ class DebugText extends FlxText
 		if (_dirty)
 		{
 			_dirty = false;
-			camera = CameraUtil.lastCamera;
 			
 			this.text = '${traceCount > 1 ? '[$traceCount] - ' : ''}$_trace';
 			this.fieldWidth = (FlxG.width - x * 2);
 			this.regenGraphic();
 		}
+		
+		camera = CameraUtil.lastCamera;
 		
 		if (_underlay.exists)
 		{

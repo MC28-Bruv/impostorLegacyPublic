@@ -47,7 +47,11 @@ class FunkinModule extends insanity.Module implements IFunkinModule
 	}
 	public override dynamic function onParsingError(exception:haxe.Exception):Void
 	{
-		FunkinScript.log(exception, cast {fileName: path, lineNumber: parser.line}, FATAL);
+		if (exception is insanity.backend.Exception.ParserException) {
+			FunkinScript.log(exception, cast {fileName: path, lineNumber: parser.line}, FATAL);
+		} else {
+			FunkinScript.log(exception.details(), cast {fileName: path, lineNumber: parser.line}, FATAL);
+		}
 	}
 	public override dynamic function onTypeError(exception:haxe.Exception, type:IInsanityType):Void
 	{
@@ -58,14 +62,7 @@ class FunkinModule extends insanity.Module implements IFunkinModule
 	{
 		super.setDefaults();
 		
-		var setImport = interp.imports.set;
-		
-		// abstracts  (these will be removed but its ok)
-		setImport('FlxPoint', flixel.math.FlxPoint.FlxBasePoint);
-		setImport("FlxTextAlign", funkin.utils.MacroUtil.buildAbstract(flixel.text.FlxText.FlxTextAlign));
-		setImport('FlxAxes', funkin.utils.MacroUtil.buildAbstract(flixel.util.FlxAxes));
-		setImport("FlxKey", funkin.utils.MacroUtil.buildAbstract(flixel.input.keyboard.FlxKey));
-		setImport('BlendMode', funkin.utils.MacroUtil.buildAbstract(openfl.display.BlendMode));
+		// lol
 	}
 }
 

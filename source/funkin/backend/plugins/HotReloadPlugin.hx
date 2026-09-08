@@ -36,12 +36,16 @@ class HotReloadPlugin extends FlxBasic
 		
 		if (FlxG.keys.justPressed.F5)
 		{
+			Logger.log('Reloading modules...', NOTICE);
+			
 			FlxTransitionableState.skipNextTransIn = FlxTransitionableState.skipNextTransOut = true;
 			FlxG.resetState();
 		}
 		
 		if (FlxG.keys.justPressed.F6)
 		{
+			Logger.log('Reloading assets...', NOTICE);
+			
 			FlxG.signals.preStateCreate.addOnce((state) -> {
 				FunkinAssets.cache.clearStoredMemory();
 				FunkinAssets.cache.clearUnusedMemory();
@@ -55,6 +59,8 @@ class HotReloadPlugin extends FlxBasic
 		
 		if (FlxG.keys.justPressed.F7)
 		{
+			Logger.log('Reloading modules...', NOTICE);
+			
 			reloadData();
 			quickResetState();
 		}

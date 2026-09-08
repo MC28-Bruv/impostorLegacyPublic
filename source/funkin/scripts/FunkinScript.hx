@@ -62,12 +62,15 @@ class FunkinScript extends insanity.Script implements IFlxDestroyable
 			'haxe.ds.StringMap', 'haxe.ds.IntMap', 'haxe.ds.ObjectMap',
 			'Main', 'openfl.Lib', 'lime.utils.Assets',
 			
+			'openfl.display.BlendMode',
+			
 			'flixel.FlxG', 'flixel.FlxSprite', 'flixel.FlxCamera',
 			'flixel.group.FlxGroup.FlxTypedGroup', 'flixel.group.FlxSpriteGroup',
 			'flixel.math.FlxMath', 'flixel.util.FlxTimer', 'flixel.tweens.FlxTween', 'flixel.tweens.FlxEase',
 			'flixel.sound.FlxSound', 'flixel.text.FlxText', 'flixel.effects.FlxFlicker', 'flixel.util.FlxSpriteUtil', 'flixel.ui.FlxBar',
 			'flixel.addons.display.FlxBackdrop', 'flixel.addons.display.FlxTiledSprite',
 			'flixel.effects.particles.FlxParticle', 'flixel.effects.particles.FlxEmitter',
+			'flixel.util.FlxAxes', 'flixel.math.FlxPoint', 'flixel.input.keyboard.FlxKey',
 			'animate.FlxAnimate', 'animate.FlxAnimateFrames', 'animate.internal.elements.FlxSpriteElement',
 			
 			'funkin.objects.FunkinSprite',
@@ -210,13 +213,6 @@ class FunkinScript extends insanity.Script implements IFlxDestroyable
 		
 		set('curBpm', Conductor.bpm);
 		set('version', Main.NMV_VERSION.trim());
-		
-		// abstracts  (these will be removed but its ok)
-		setImport('FlxPoint', flixel.math.FlxPoint.FlxBasePoint);
-		setImport("FlxTextAlign", funkin.utils.MacroUtil.buildAbstract(flixel.text.FlxText.FlxTextAlign));
-		setImport('FlxAxes', funkin.utils.MacroUtil.buildAbstract(flixel.util.FlxAxes));
-		setImport("FlxKey", funkin.utils.MacroUtil.buildAbstract(flixel.input.keyboard.FlxKey));
-		setImport('BlendMode', funkin.utils.MacroUtil.buildAbstract(openfl.display.BlendMode));
 		
 		set("keyToString", (key:Int) -> {
 			return flixel.input.keyboard.FlxKey.toStringMap.get(key);
