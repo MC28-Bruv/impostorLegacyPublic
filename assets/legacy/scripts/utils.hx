@@ -181,6 +181,8 @@ function modifyGUI()
 
 function onPopUpScorePost(note, rating)
 {
+	if (ClientPrefs.hideHud) return;
+	
 	if (ratingGraphic != null)
 	{
 		// functionality still exists
@@ -218,9 +220,9 @@ function onPopUpScorePost(note, rating)
 	return Function_Continue; // Let original function run
 }
 
+if (ClientPrefs.inDevMode) {
 function onUpdate(elapsed)
 {
-	if (!ClientPrefs.inDevMode) return;
 	if (FlxG.keys.justPressed.TAB)
 	{
 		showDevInfo = !showDevInfo;
@@ -274,6 +276,7 @@ function onUpdate(elapsed)
 public function getBool(sss:String, bbb:Bool, ?withSlashN:Bool = true):String
 {
 	return (withSlashN ? '\n' : '') + sss + ': ' + (bbb ? 'ON' : 'OFF');
+}
 }
 
 function onFirstEventPush(event:EventNote) // I had to add this callback to all scripts it was only being called by event scripts (which makes sense)

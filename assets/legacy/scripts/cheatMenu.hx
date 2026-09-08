@@ -1,5 +1,22 @@
 import flixel.addons.ui.FlxUIButton;
 
+if (!ClientPrefs.inDevMode && !PlayState.chartingMode) return;
+
+var warping:Bool = false;
+function onUpdate(elapsed:Float):Void
+{
+	if (FlxG.keys.pressed.THREE)
+	{
+		playbackRate = (FlxG.keys.pressed.SHIFT ? .5 : 2);
+		warping = true;
+	}
+	else if (warping)
+	{
+		playbackRate = 1;
+		warping = false;
+	}
+}
+
 if (!ClientPrefs.inDevMode) return;
 
 public var dbGroup:FlxSpriteGroup = new FlxSpriteGroup();
@@ -41,24 +58,6 @@ function onCreatePost()
 	playbackSlider.minLabel.y = playbackSlider.maxLabel.y = playbackSlider.valueLabel.y -= 5;
 	playbackSlider.nameLabel.text = 'Playback Rate';
 	playbackSlider.nameLabel.y += 5;
-}
-
-var warping:Bool = false;
-function onUpdate()
-{
-	if (ClientPrefs.inDevMode || PlayState.chartingMode)
-	{
-		if (FlxG.keys.pressed.THREE)
-		{
-			playbackRate = (FlxG.keys.pressed.SHIFT ? .5 : 2);
-			warping = true;
-		}
-		else if (warping)
-		{
-			playbackRate = 1;
-			warping = false;
-		}
-	}
 }
 
 function recalculateMiddlescroll():Void
