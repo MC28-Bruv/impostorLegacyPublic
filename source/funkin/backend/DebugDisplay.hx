@@ -10,6 +10,8 @@ import openfl.display.Sprite;
 import flixel.util.FlxStringUtil;
 import flixel.FlxG;
 
+import insanity.custom.InsanityType;
+
 /**
  * enum that handles the display type of the FPS counter.
  */
@@ -182,6 +184,10 @@ class DebugDisplay extends Sprite
 		__updateText();
 	}
 	
+	var _state:Null<flixel.FlxState> = null;
+	var stateName:String = '';
+	
+	@:nullSafety(Off) // die
 	function __updateText()
 	{
 		displayType = FpsDisplayMode.fromString(ClientPrefs.fpsDisplayType);
@@ -197,15 +203,21 @@ class DebugDisplay extends Sprite
 		
 		if (displayType == FpsDisplayMode.ADVANCED)
 		{
-			var className = Type.getClassName(Type.getClass(FlxG.state));
-			if (className.indexOf("ScriptedState") != -1)
+			if (FlxG.state != null && _state != FlxG.state)
 			{
-				var scripted:funkin.scripting.ScriptedState = cast FlxG.state;
-				var path = funkin.scripts.FunkinScript.getPath('scripts/states/${scripted.scriptName}');
-				className = 'ScriptedState • (${path.replace('scripts/states/', '../../')})';
+				if (FlxG.state is funkin.scripting.ScriptedState)
+				{
+					var scripted:funkin.scripting.ScriptedState = cast _state;
+					var path = funkin.scripts.FunkinScript.getPath('scripts/states/${scripted.scriptName}');
+					stateName = 'ScriptedState • (${path.replace('scripts/states/', '../../')})';
+				}
+				else
+				{
+					stateName = InsanityType.getClassName(InsanityType.getClass(_state = FlxG.state));
+				}
 			}
 			
-			str += ' • $className';
+			str += ' • $stateName';
 			
 			for (fun in plugins)
 			{
@@ -217,7 +229,7 @@ class DebugDisplay extends Sprite
 				}
 				catch (e)
 				{
-					Logger.log('Error on debug display plugin: $e', WARN);
+					Logger.log('Error on debug display plugin: $e', ERROR, true);
 					
 					plugins.remove(fun);
 				}
