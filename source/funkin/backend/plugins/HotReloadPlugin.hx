@@ -15,6 +15,8 @@ class HotReloadPlugin extends FlxBasic
 {
 	static var instance:Null<HotReloadPlugin> = null;
 	
+	public static var hardReloading:Bool = false;
+	
 	public static function init()
 	{
 		if (instance == null) FlxG.plugins.addPlugin(instance = new HotReloadPlugin());
@@ -38,8 +40,7 @@ class HotReloadPlugin extends FlxBasic
 		{
 			Logger.log('Reloading modules...', NOTICE);
 			
-			FlxTransitionableState.skipNextTransIn = FlxTransitionableState.skipNextTransOut = true;
-			FlxG.resetState();
+			quickResetState();
 		}
 		
 		if (FlxG.keys.justPressed.F6)
@@ -53,7 +54,7 @@ class HotReloadPlugin extends FlxBasic
 			
 			funkin.Mods.currentModConfig = funkin.Mods.loadTopModConfig();
 			
-			reloadData();
+			hardReload();
 			quickResetState();
 		}
 		
@@ -61,16 +62,23 @@ class HotReloadPlugin extends FlxBasic
 		{
 			Logger.log('Reloading modules...', NOTICE);
 			
-			reloadData();
+			hardReload();
 			quickResetState();
 		}
 	}
 	
-	inline function reloadData():Void {
-		funkin.scripts.FunkinModuleCollection.refresh(true);
-		funkin.scripting.PluginsManager.populate();
-		funkin.data.GameFlags.getAwards(true);
-		funkin.data.Lang.reloadLangFile();
+	inline function hardReload():Void {
+		hardReloading = true;
+		
+		funkin.scripting.PluginsManager.clear();
+		
+		FlxG.signals.preStateCreate.addOnce((state) -> {
+			funkin.scripting.PluginsManager.populate();
+			funkin.data.GameFlags.getAwards(true);
+			funkin.data.Lang.reloadLangFile();
+			
+			hardReloading = false;
+		});
 	}
 	
 	inline function quickResetState():Void {

@@ -21,7 +21,6 @@ class PluginsManager
 	 */
 	public static function populate():Void
 	{
-		clear();
 		for (file in Paths.listAllFilesInDirectory('scripts/plugins/', LOOSE))
 		{
 			if (FunkinScript.isHxFile(file))

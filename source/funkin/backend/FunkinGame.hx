@@ -81,7 +81,7 @@ class FunkinGame extends flixel.FlxGame
 		
 		if (_gameJustStarted) FlxG.signals.preGameStart.dispatch();
 		
-		funkin.scripts.FunkinModuleCollection.refresh();
+		funkin.scripts.FunkinModuleCollection.refresh(funkin.backend.plugins.HotReloadPlugin.hardReloading);
 		
 		DebugDisplay.instance?.plugins.resize(0);
 		

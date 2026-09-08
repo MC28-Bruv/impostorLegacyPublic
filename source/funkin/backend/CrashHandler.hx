@@ -40,8 +40,6 @@ class CrashHandler
 		
 		var message:String = Std.string(event.error);
 		
-		#if sys Sys.println #else trace #end (message);
-		
 		if (Std.isOfType(event.error, Error))
 		{
 			message = cast(event.error, Error).message;
@@ -79,6 +77,7 @@ class CrashHandler
 		final callstackMessage = stackMessage.trim().length == 0 ? ' N/A' : '\n$stackMessage';
 		
 		var fullReport = '$curFlxState\n\nException caught: $message\n\nCallstack:$callstackMessage';
+		trace('$message\n$callstackMessage');
 		
 		FlxG.switchState(() -> new FallbackState(fullReport, () -> FlxG.switchState(() -> new MainMenuState())));
 	}

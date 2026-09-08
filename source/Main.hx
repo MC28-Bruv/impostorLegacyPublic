@@ -47,6 +47,7 @@ class Main extends Sprite
 		#end
 		
 		funkin.scripts.FunkinScript.init();
+		funkin.scripting.PluginsManager.prepareSignals();
 		
 		initHaxeUI();
 		

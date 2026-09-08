@@ -12,6 +12,7 @@ import flixel.addons.transition.FlxTransitionableState;
 class DebugTextPlugin extends FlxTypedGroup<DebugText>
 {
 	static var instance:Null<DebugTextPlugin> = null;
+	static var _queue:Array<{message:String, color:FlxColor}> = []; // pmo
 	
 	public static function init()
 	{
@@ -49,22 +50,22 @@ class DebugTextPlugin extends FlxTypedGroup<DebugText>
 		return instance.recycle(DebugText, () -> new DebugText(message));
 	}
 	
-	public static function addText(message:String, colour:FlxColor = FlxColor.WHITE)
+	static function showText(message:String, colour:FlxColor = FlxColor.WHITE)
 	{
-		if (instance == null) return;
-		
 		final text = grabText(message);
 		
-		text.traceCount++;
+		text.traceCount ++;
 		text.color = colour;
 		text.setText(message);
 		text.resetValues();
 		text.revive();
 		
-		instance.remove(text, true);
-		instance.insert(0, text);
-		
-		posText();
+		return text;
+	}
+	
+	public static function addText(message:String, colour:FlxColor = FlxColor.WHITE)
+	{
+		_queue.push({message: message, color: colour});
 	}
 	
 	static function clearTxt()
@@ -72,8 +73,26 @@ class DebugTextPlugin extends FlxTypedGroup<DebugText>
 		if (instance == null) return;
 		
 		instance.forEach(text -> text?.destroy());
-		
 		instance.clear();
+	}
+	
+	override function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
+		
+		if (_queue.length == 0 || instance == null) return;
+		
+		while (_queue.length > 0)
+		{
+			final data = _queue.shift();
+			if (data == null) continue;
+			
+			final text:DebugText = showText(data.message, data.color);
+			instance.remove(text, true);
+			instance.insert(0, text);
+		}
+		
+		posText();
 	}
 }
 
@@ -140,13 +159,12 @@ class DebugText extends FlxText
 		if (_dirty)
 		{
 			_dirty = false;
+			camera = CameraUtil.lastCamera;
 			
 			this.text = '${traceCount > 1 ? '[$traceCount] - ' : ''}$_trace';
 			this.fieldWidth = (FlxG.width - x * 2);
 			this.regenGraphic();
 		}
-		
-		camera = CameraUtil.lastCamera;
 		
 		if (_underlay.exists)
 		{
