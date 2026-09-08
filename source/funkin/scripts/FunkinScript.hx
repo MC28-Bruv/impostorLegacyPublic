@@ -230,8 +230,10 @@ class FunkinScript extends insanity.Script implements IFlxDestroyable
 		set("game", FlxG.state);
 		set("state", FlxG.state);
 		
-		if ((FlxG.state is PlayState))
+		if (FlxG.state is PlayState)
 		{
+			final game:PlayState = cast FlxG.state;
+			
 			set("inPlaystate", true);
 			set('bpm', PlayState.SONG.bpm);
 			set('scrollSpeed', PlayState.SONG.speed);
@@ -242,21 +244,21 @@ class FunkinScript extends insanity.Script implements IFlxDestroyable
 			set('seenCutscene', PlayState.seenCutscene);
 			set('week', funkin.data.WeekData.weeksList[PlayState.storyMeta.curWeek]);
 			set('difficultyName', funkin.backend.Difficulty.difficulties[PlayState.storyMeta.difficulty]);
-			set('healthGainMult', PlayState.instance.healthGain);
-			set('healthLossMult', PlayState.instance.healthLoss);
-			set('botPlay', PlayState.instance.cpuControlled);
-			set('practice', PlayState.instance.practiceMode);
+			set('healthGainMult', game.healthGain);
+			set('healthLossMult', game.healthLoss);
+			set('botPlay', game.cpuControlled);
+			set('practice', game.practiceMode);
 			set('mustHitSection', PlayState.SONG?.notes[0]?.mustHitSection ?? false);
 			
-			set("global", PlayState.instance.variables);
+			set("global", game.variables);
 			set("getInstance", funkin.scripting.ScriptConstants.getInstance);
 			
-			set('setVar', (varName:String, val:Dynamic) -> PlayState.instance.variables.set(varName, val));
-			set('getVar', (varName:String) -> PlayState.instance.variables.get(varName));
+			set('setVar', (varName:String, val:Dynamic) -> game.variables.set(varName, val));
+			set('getVar', (varName:String) -> game.variables.get(varName));
 			
 			set('initScript', (path:String) -> {
 				path = FunkinScript.getPath(path);
-				if (!PlayState.instance.scripts.exists(path)) PlayState.instance.initFunkinScript(path);
+				if (!game.scripts.exists(path)) game.initFunkinScript(path);
 			});
 		}
 		else
