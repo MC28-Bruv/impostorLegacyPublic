@@ -14,6 +14,8 @@ import funkin.states.transitions.SwipeTransition;
 import funkin.input.Controls;
 import funkin.scripts.*;
 
+import insanity.custom.InsanityType;
+
 class MusicBeatState extends FlxUIState
 {
 	static final _defaultTransState:Class<BaseTransitionState> = SwipeTransition;
@@ -60,7 +62,7 @@ class MusicBeatState extends FlxUIState
 	{
 		if (scriptName == null)
 		{
-			final stateName = Type.getClassName(Type.getClass(this)).split('.').pop();
+			final stateName = InsanityType.getClassName(InsanityType.getClass(this)).split('.').pop();
 			scriptName = stateName ?? '???';
 		}
 		

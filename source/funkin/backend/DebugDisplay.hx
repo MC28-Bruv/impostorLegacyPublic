@@ -207,8 +207,9 @@ class DebugDisplay extends Sprite
 			{
 				if (FlxG.state is funkin.scripting.ScriptedState)
 				{
-					var scripted:funkin.scripting.ScriptedState = cast _state;
-					var path = funkin.scripts.FunkinScript.getPath('scripts/states/${scripted.scriptName}');
+					var scripted:funkin.scripting.ScriptedState = cast FlxG.state;
+					var path:String = funkin.scripts.FunkinScript.getPath('scripts/states/${scripted.scriptName}');
+					#if ASSET_REDIRECT path = path.replace(Paths.trail, ''); #end
 					stateName = 'ScriptedState • (${path.replace('scripts/states/', '../../')})';
 				}
 				else

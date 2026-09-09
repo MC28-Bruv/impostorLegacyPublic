@@ -7,6 +7,8 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import funkin.input.Controls;
 import funkin.scripts.*;
 
+import insanity.custom.InsanityType;
+
 class MusicBeatSubstate extends FlxSubState
 {
 	public function new()
@@ -38,7 +40,7 @@ class MusicBeatSubstate extends FlxSubState
 	{
 		if (scriptName == null)
 		{
-			final stateName = Type.getClassName(Type.getClass(this)).split('.').pop();
+			final stateName = InsanityType.getClassName(InsanityType.getClass(this)).split('.').pop();
 			scriptName = stateName ?? '???';
 		}
 		

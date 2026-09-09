@@ -1908,6 +1908,17 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	
+	inline function modchart(obj:Dynamic, id:Int, offsets:haxe.ds.Vector<FlxPoint>, vector:funkin.backend.math.Vector3)
+	{
+		final pos = modManager.getPos(0, 0, 0, curDecBeat, obj.noteData, id, obj, vector);
+		final offsets = (offsets != null ? offsets[obj.noteData] : null);
+		
+		modManager.updateObject(curDecBeat, obj, pos, id);
+		
+		obj.spriteOffset.set(offsets?.x, offsets?.y);
+		
+		return pos;
+	}
 	override public function update(elapsed:Float):Void
 	{
 		canPlayAwardSound = true;
@@ -1974,25 +1985,13 @@ class PlayState extends MusicBeatState
 		
 		final canUpdateModchart:Bool = (modifiersRegistered && playFields != null);
 		
-		inline function modchart(obj:Dynamic, id:Int, offsets:haxe.ds.Vector<FlxPoint>)
-		{
-			final pos = modManager.getPos(0, 0, 0, curDecBeat, obj.noteData, id, obj, tempVector);
-			final offsets = (offsets != null ? offsets[obj.noteData] : null);
-			
-			modManager.updateObject(curDecBeat, obj, pos, id);
-			
-			obj.spriteOffset.set(offsets?.x, offsets?.y);
-			
-			return pos;
-		}
-		
 		if (canUpdateModchart)
 		{
 			for (playField in playFields)
 			{
 				final id = playField.ID, skin = playField._skin;
 				
-				playField.forEachAlive(function(strum) modchart(strum, id, skin.receptorOffsets));
+				playField.forEachAlive(function(strum) modchart(strum, id, skin.receptorOffsets, tempVector));
 			}
 		}
 		
@@ -2100,9 +2099,9 @@ class PlayState extends MusicBeatState
 			{
 				final id = playField.ID, skin = playField._skin;
 				
-				playField.grpSusSplashes.forEachAlive(function(splash) modchart(splash, id, skin.sustainSplashOffsets));
+				playField.grpSusSplashes.forEachAlive(function(splash) modchart(splash, id, skin.sustainSplashOffsets, tempVector));
 				
-				if (playField.trackNoteSplashes) playField.grpNoteSplashes.forEachAlive(function(splash) modchart(splash, id, skin.splashOffsets));
+				if (playField.trackNoteSplashes) playField.grpNoteSplashes.forEachAlive(function(splash) modchart(splash, id, skin.splashOffsets, tempVector));
 			}
 		}
 		
