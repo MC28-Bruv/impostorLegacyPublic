@@ -1694,18 +1694,18 @@ class PlayState extends MusicBeatState
 		
 	public function getSV(time:Float):SpeedEvent
 	{
-		var event:SpeedEvent = {};
+		var event:SpeedEvent = null;
 		
 		for (shit in speedChanges)
 		{
-			if (shit.startTime <= time && shit.startTime >= event.startTime)
+			if (event == null || (shit.startTime <= time && shit.startTime >= event.startTime))
 			{
 				if (shit.startSpeed == null) shit.startSpeed = event.speed;
 				event = shit;
 			}
 		}
 		
-		return event;
+		return (event ?? {});
 	}
 	
 	public inline function getVisualPosition() return getTimeFromSV(Conductor.songPosition, currentSV);
@@ -1908,9 +1908,10 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	
-	inline function modchart(obj:Dynamic, id:Int, offsets:haxe.ds.Vector<FlxPoint>, vector:funkin.backend.math.Vector3)
+	static var _modchartVector:funkin.backend.math.Vector3 = funkin.backend.math.Vector3.get();
+	inline function modchart(obj:funkin.game.modchart.ModchartNote, id:Int, offsets:haxe.ds.Vector<FlxPoint>)
 	{
-		final pos = modManager.getPos(0, 0, 0, curDecBeat, obj.noteData, id, obj, vector);
+		final pos = modManager.getPos(0, 0, 0, curDecBeat, obj.noteData, id, obj, _modchartVector);
 		final offsets = (offsets != null ? offsets[obj.noteData] : null);
 		
 		modManager.updateObject(curDecBeat, obj, pos, id);
@@ -1919,15 +1920,12 @@ class PlayState extends MusicBeatState
 		
 		return pos;
 	}
+	
 	override public function update(elapsed:Float):Void
 	{
 		canPlayAwardSound = true;
 		
-		if (cameraLerping && !inCutscene)
-		{
-			final lerpRate = 0.04 * cameraSpeed;
-			FlxG.camera.followLerp = lerpRate;
-		}
+		if (cameraLerping && !inCutscene) FlxG.camera.followLerp = (.04 * cameraSpeed);
 		
 		if (generatedMusic && !endingSong && !isCameraOnForcedPos) moveCameraSection();
 		
@@ -1942,8 +1940,6 @@ class PlayState extends MusicBeatState
 			
 			if (FlxG.keys.anyJustPressed(debugKeysCharacter)) openCharacterEditor();
 		}
-		
-		if (health > healthBounds.max) health = healthBounds.max;
 		
 		if (startingSong)
 		{
@@ -1980,8 +1976,6 @@ class PlayState extends MusicBeatState
 		
 		while (queueNotes.length > 0 && (queueNotes[0].strumTime - Conductor.songPosition) < spawnOffset)
 			recycleNote(queueNotes.shift());
-			
-		var tempVector = funkin.backend.math.Vector3.get();
 		
 		final canUpdateModchart:Bool = (modifiersRegistered && playFields != null);
 		
@@ -1991,7 +1985,9 @@ class PlayState extends MusicBeatState
 			{
 				final id = playField.ID, skin = playField._skin;
 				
-				playField.forEachAlive(function(strum) modchart(strum, id, skin.receptorOffsets, tempVector));
+				for (strum in playField) {
+					if (strum?.alive) modchart(strum, id, skin.receptorOffsets);
+				}
 			}
 		}
 		
@@ -2000,7 +1996,7 @@ class PlayState extends MusicBeatState
 			if (!inCutscene)
 			{
 				if (!cpuControlled) keyShit();
-				else if (boyfriend.holdTimer > Conductor.stepCrotchet * 0.0011 * boyfriend.singDuration
+				else if (boyfriend.holdTimer > Conductor.stepCrotchet * .002 * boyfriend.singDuration
 					&& boyfriend.getAnimName().startsWith('sing')
 					&& !boyfriend.getAnimName().endsWith('miss')) boyfriend.dance(boyfriend.forceDance);
 			}
@@ -2048,7 +2044,7 @@ class PlayState extends MusicBeatState
 				final visPos = ((daNote.visualTime - Conductor.visualPosition) * songSpeed);
 				final diff = (daNote.strumTime - Conductor.songPosition);
 				
-				final pos = modManager.getPos(daNote.strumTime, visPos, diff, curDecBeat, daNote.noteData, daNote.lane, daNote, tempVector);
+				final pos = modManager.getPos(daNote.strumTime, visPos, diff, curDecBeat, daNote.noteData, daNote.lane, daNote, _modchartVector);
 				
 				modManager.updateObject(curDecBeat, daNote, pos, daNote.lane);
 				
@@ -2099,15 +2095,22 @@ class PlayState extends MusicBeatState
 			{
 				final id = playField.ID, skin = playField._skin;
 				
-				playField.grpSusSplashes.forEachAlive(function(splash) modchart(splash, id, skin.sustainSplashOffsets, tempVector));
+				for (splash in playField.grpSusSplashes) {
+					if (splash?.alive) modchart(splash, id, skin.sustainSplashOffsets);
+				}
 				
-				if (playField.trackNoteSplashes) playField.grpNoteSplashes.forEachAlive(function(splash) modchart(splash, id, skin.splashOffsets, tempVector));
+				if (playField.trackNoteSplashes) {
+					for (splash in playField.grpNoteSplashes) {
+						if (splash?.alive) modchart(splash, id, skin.splashOffsets);
+					}
+				}
 			}
 		}
 		
-		tempVector.put();
+		if (health > healthBounds.max) health = healthBounds.max;
 		
-		scripts.call('onUpdate', [elapsed]);
+		final arg = [elapsed];
+		scripts.call('onUpdate', arg);
 		
 		super.update(elapsed);
 		input.update();
@@ -2129,15 +2132,15 @@ class PlayState extends MusicBeatState
 			camHUD.zoom = MathUtil.decayLerp(camHUD.zoom, defaultHudZoom, 6.25 * camZoomingDecay, elapsed);
 		}
 		
-		doDeathCheck();
-		
 		for (i in followingCams)
 		{
 			i.zoom = FlxG.camera.zoom;
 			i.scroll.copyFrom(FlxG.camera.scroll);
 		}
 		
-		if (#if debug true || #end chartingMode || ClientPrefs.inDevMode)
+		doDeathCheck();
+		
+		#if (!debug) if (chartingMode || ClientPrefs.inDevMode) #end
 		{
 			if (!endingSong && !startingSong)
 			{
@@ -2159,7 +2162,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		scripts.call('onUpdatePost', [elapsed]);
+		scripts.call('onUpdatePost', arg);
 	}
 	
 	public function recycleNote(queueNote:QueueNote, ?parent:Note, ?prevNote:Note):Note
@@ -2219,7 +2222,8 @@ class PlayState extends MusicBeatState
 			
 			return null;
 		}
-		else if (expectedPlayfield.autoPlayed && note.strumTime <= Conductor.songPosition && !note.ignoreNote /* && !note.blockHit */)
+		/* this is probably not super helpful
+		else if (expectedPlayfield.autoPlayed && note.strumTime <= Conductor.songPosition && !note.ignoreNote /* && !note.blockHit)
 		{
 			expectedPlayfield.onNoteHit.dispatch(note, expectedPlayfield);
 			note.kill();
@@ -2232,7 +2236,7 @@ class PlayState extends MusicBeatState
 			note.kill();
 			
 			return null;
-		}
+		} */
 		else
 		{
 			expectedPlayfield.addNote(note);
@@ -2299,9 +2303,7 @@ class PlayState extends MusicBeatState
 	
 	function doDeathCheck(instakill:Bool = false):Bool
 	{
-		final healthDeath:Bool = ((healthBounds.max > healthBounds.min && health <= healthBounds.min) || (healthBounds.min > healthBounds.max && health >= healthBounds.min));
-		
-		if ((instakill || healthDeath) && !practiceMode && !isDead)
+		if ((instakill || health <= healthBounds.min) && !practiceMode && !isDead)
 		{
 			if (!ScriptConstants.stopping(scripts.call('onGameOver')))
 			{
@@ -2330,6 +2332,7 @@ class PlayState extends MusicBeatState
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	
@@ -3143,6 +3146,8 @@ class PlayState extends MusicBeatState
 					if (higherPriority || (!higherPriority && note.strumTime < topNote.strumTime)) topNote = note;
 				}
 				
+				final strum:StrumNote = field.members[key];
+				
 				if (topNote != null)
 				{
 					field.onNoteHit.dispatch(topNote, field);
@@ -3151,14 +3156,14 @@ class PlayState extends MusicBeatState
 				}
 				else if (field.playAnims)
 				{
-					var strum = field.members[key];
-					
 					if (strum != null)
 					{
 						strum.playAnim('pressed');
 						strum.resetAnim = 0;
 					}
 				}
+				
+				if (strum != null) strum.holding = true;
 			}
 			
 			if (ghostTapped && anyInput)
@@ -3198,11 +3203,14 @@ class PlayState extends MusicBeatState
 		{
 			if (field.inControl && !field.autoPlayed && field.playerControls)
 			{
-				var spr:StrumNote = field.members[key];
-				if (spr != null)
+				final strum:StrumNote = field.members[key];
+				
+				if (strum != null)
 				{
-					spr.playAnim('static');
-					spr.resetAnim = 0;
+					strum.playAnim('static');
+					strum.resetAnim = 0;
+					
+					strum.holding = false;
 				}
 				
 				for (splash in field.grpSusSplashes)
@@ -3223,20 +3231,22 @@ class PlayState extends MusicBeatState
 		if (!startedCountdown || !generatedMusic || boyfriend.stunned) return;
 		
 		// HOLDING
-		final up:Bool = controls.NOTE_UP;
-		final right:Bool = controls.NOTE_RIGHT;
-		final down:Bool = controls.NOTE_DOWN;
-		final left:Bool = controls.NOTE_LEFT;
-		final taunting:Bool = (controls.NOTE_TAUNT && (focusPlayer ?? boyfriend)?.canTaunt);
+		var anyPressed:Bool = (controls.NOTE_TAUNT && (focusPlayer ?? boyfriend)?.canTaunt);
+		if (!anyPressed) {
+			for (i in 0 ... SONG.keys) {
+				if (!input.inputPressed(i)) continue;
+				
+				anyPressed = true;
+				break;
+			}
+		}
 		
 		var i:Int = notes.length;
-		while (--i >= 0)
+		while (-- i >= 0)
 		{
-			var daNote = notes.members[i];
+			final daNote:Note = notes.members[i];
 			
-			if (!daNote.alive) continue;
-			
-			if (daNote.isSustainNote && !daNote.blockHit && !daNote.tooLate && !daNote.playField.autoPlayed
+			if (daNote.alive && daNote.isSustainNote && !daNote.blockHit && !daNote.tooLate && !daNote.playField.autoPlayed
 				&& daNote.playField.inControl && daNote.playField.playerControls)
 			{
 				final holding:Bool = input.inputPressed(daNote.noteData);
@@ -3262,7 +3272,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		if (!left && !down && !up && !right && !taunting)
+		if (!anyPressed)
 		{
 			for (field in playFields)
 			{
@@ -3273,7 +3283,7 @@ class PlayState extends MusicBeatState
 			{
 				for (holder in holders)
 					holder.holding = false;
-					
+				
 				holders.resize(0);
 			}
 		}

@@ -12,7 +12,7 @@ import funkin.data.*;
 
 class StrumNote extends funkin.game.modchart.ModchartNote
 {
-	public var intThing:Int = 0;
+	public var holding:Bool = false;
 	
 	public var resetAnim:Float = 0;
 	public var direction:Float = 90;
@@ -139,7 +139,7 @@ class StrumNote extends funkin.game.modchart.ModchartNote
 	
 	override function update(elapsed:Float)
 	{
-		if (coyoteTime > 0 && getAnimName() != 'confirm') // improve
+		if (coyoteTime > 0 && !holding) // #improved
 			coyoteTime = Math.max(coyoteTime - elapsed, 0);
 		
 		if (resetAnim > 0)

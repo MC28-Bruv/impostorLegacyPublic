@@ -13,7 +13,7 @@ class InitMacro
 		'flixel.FlxBasic', 'flixel.FlxObject', 'flixel.FlxSprite', 'flixel.FlxStrip', 'flixel.FlxState', 'flixel.FlxSubState', 'flixel.text.FlxText',
 		'flixel.system.ui.FlxSoundTray', 'flixel.addons.ui.FlxUIState', 'flixel.addons.transition.FlxTransitionableState',
 		
-		'funkin.game.modchart.events.BaseEvent',
+		'funkin.game.modchart.ModchartNote', 'funkin.game.modchart.events.BaseEvent',
 		'funkin.game.modchart.Modifier', 'funkin.game.modchart.NoteModifier', 'funkin.game.modchart.modifiers.PathModifier',
 		'funkin.backend.MusicBeatState', 'funkin.backend.MusicBeatSubstate',
 		
