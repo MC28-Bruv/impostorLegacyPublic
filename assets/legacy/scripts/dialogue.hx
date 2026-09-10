@@ -309,14 +309,14 @@ function v4SpeakerShit()
 	if (!speaker.visible)
 	{
 		speaker.visible = true;
-		switch (speaker)
+		switch (portrait.indexOf(speaker))
 		{
-			case portrait[2]:
-				FlxTween.tween(speaker, {alpha: 1, x: 865}, 0.5, {ease: FlxEase.quadInOut});
-			case portrait[0]:
+			case 0:
 				FlxTween.tween(speaker, {alpha: 1, x: 247}, 0.5, {ease: FlxEase.quadInOut});
-			case portrait[1]:
+			case 1:
 				FlxTween.tween(speaker, {alpha: 1, y: 148}, 0.5, {ease: FlxEase.quadInOut});
+			case 2:
+				FlxTween.tween(speaker, {alpha: 1, x: 865}, 0.5, {ease: FlxEase.quadInOut});
 		}
 	}
 }
