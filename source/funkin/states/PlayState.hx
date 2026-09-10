@@ -1996,7 +1996,7 @@ class PlayState extends MusicBeatState
 			if (!inCutscene)
 			{
 				if (!cpuControlled) keyShit();
-				else if (boyfriend.holdTimer > Conductor.stepCrotchet * .002 * boyfriend.singDuration
+				else if (boyfriend.holdTimer > Conductor.stepCrotchet * .001 * boyfriend.singDuration
 					&& boyfriend.getAnimName().startsWith('sing')
 					&& !boyfriend.getAnimName().endsWith('miss')) boyfriend.dance(boyfriend.forceDance);
 			}
