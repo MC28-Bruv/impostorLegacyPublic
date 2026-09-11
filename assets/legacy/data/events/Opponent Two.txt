@@ -1,3 +1,0 @@
-Functionality: stage/song
-used only in stages/cargo.hx for some reason
-there are better ways of handling opponent two and even both opponent notes

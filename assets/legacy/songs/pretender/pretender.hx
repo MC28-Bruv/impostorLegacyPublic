@@ -1,1 +1,0 @@
-function onCreatePost() pauseOverwrite = 'pretender';

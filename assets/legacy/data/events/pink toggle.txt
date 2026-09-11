@@ -1,3 +1,0 @@
-Functionality: stage/song
-value 1: length by seconds (leave empty if you want it forever)
-value 2: idk

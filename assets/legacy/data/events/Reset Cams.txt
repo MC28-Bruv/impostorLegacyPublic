@@ -1,2 +1,0 @@
-Functionality: global
-resets the cameras from Set Cams
