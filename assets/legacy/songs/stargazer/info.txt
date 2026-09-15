@@ -1,3 +1,0 @@
-Stargazer
-Composer: punkett
-Charter: emi3

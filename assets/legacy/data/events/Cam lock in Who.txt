@@ -1,2 +1,0 @@
-Functionality: stage/song
-functions the same as voting time but only slightly different
