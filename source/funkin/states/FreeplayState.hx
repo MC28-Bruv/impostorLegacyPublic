@@ -803,7 +803,7 @@ class FreeplayState extends AmongUIState
 		});
 	}
 	
-	public static function loadSong(song:String, silent:Bool = false):Void
+	public function loadSong(song:String, silent:Bool = false):Void
 	{
 		// PlayState.storyMeta.difficulty = 1; // This would be 2 but I just made them all normal difficulty because -hard was annoying lol
 		
