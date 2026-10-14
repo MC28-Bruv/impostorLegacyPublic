@@ -6,6 +6,7 @@ import funkin.utils.ProgressionUtil;
 
 typedef AwardEntry =
 {
+	var ?mod:String;
 	var id:String;
 	var icon:String;
 	var title:String;
@@ -18,7 +19,9 @@ typedef AwardEntry =
 
 class GameFlags
 {
-	static var cachedAwards:Array<AwardEntry> = null;
+	static var cachedAwards:Array<AwardEntry> = [];
+	
+	public static var modAwards:Map<String, Array<AwardEntry>> = [];
 	
 	/**
 		game flags menu
@@ -50,57 +53,42 @@ class GameFlags
 		return id;
 	}
 	
-	public static function getAwards(forceReload:Bool = false):Array<AwardEntry>
+	static function reloadAwards():Void
 	{
-		if (cachedAwards != null && !forceReload) return cachedAwards;
+		cachedAwards.resize(0);
+		modAwards.clear();
 		
-		cachedAwards = [];
-		
-		final path = Paths.getPath('data/awards.json', NORMAL);
-		if (!FunkinAssets.exists(path, TEXT)) return cachedAwards;
-		
-		final jsonData:Dynamic = FunkinAssets.parseJson(FunkinAssets.getContent(path));
-		if (jsonData == null) return cachedAwards;
-		
-		final entries:Array<Dynamic> = cast Reflect.field(jsonData, 'awards');
-		if (entries == null) return cachedAwards;
-		
-		for (i in 0...entries.length)
-		{
-			final raw:Dynamic = entries[i];
-			if (raw == null) continue;
+		for (path in Paths.listPath('data/awards.json', LOOSE)) {
+			final awardsData:Null<{awards: Array<Dynamic>}> = FunkinAssets.parseJson(FunkinAssets.getContent(path));
 			
-			var id:String = Reflect.field(raw, 'id');
-			if (id == null || id.trim().length == 0) id = Reflect.field(raw, 'img');
-			if (id == null || id.trim().length == 0) id = Paths.sanitize(Std.string(Reflect.field(raw, 'name') ?? 'award_$i').toLowerCase());
+			if (awardsData == null) continue;
 			
-			var icon:String = Reflect.field(raw, 'img');
-			if (icon == null || icon.trim().length == 0) icon = id;
+			final mod:String = Paths.getModFolder(path);
 			
-			var title:String = Reflect.field(raw, 'name');
-			if (title == null) title = id;
-			
-			var hint:String = Reflect.field(raw, 'hint');
-			if (hint == null) hint = '';
-			
-			var desc:String = Reflect.field(raw, 'desc');
-			if (desc == null) desc = '';
-			
-			final songs = parseCSV(Reflect.field(raw, 'songs') ?? Reflect.field(raw, 'song'), true);
-			final weeks = parseCSV(Reflect.field(raw, 'weeks') ?? Reflect.field(raw, 'week'), false);
-			
-			cachedAwards.push(
+			final awards:Array<AwardEntry> = [for (i => award in awardsData.awards) {
+				final awardID:String = (award.id ?? award.img ?? Paths.sanitize(Std.string(award.name ?? 'award_$i').toLowerCase()));
+				
 				{
-					id: id,
-					icon: icon,
-					title: title,
-					hint: hint,
-					desc: desc,
-					hidden: (Reflect.field(raw, 'hidden') == true),
-					songs: songs,
-					weeks: weeks
-				});
+					mod: mod,
+					id: awardID,
+					icon: (award.img ?? awardID),
+					title: (award.name ?? awardID),
+					hint: (award.hint ?? ''),
+					desc: (award.desc ?? ''),
+					hidden: (award.hidden == true),
+					songs: [for (s in parseCSV(cast (award.songs ?? award.song))) Paths.sanitize(s)],
+					weeks: [for (s in parseCSV(cast (award.weeks ?? award.week))) Paths.sanitize(s)]
+				}
+			}];
+			
+			for (award in awards) cachedAwards.push(award);
+			modAwards.set(mod, awards);
 		}
+	}
+	
+	public static function getAwards(hard:Bool = false):Array<AwardEntry>
+	{
+		if (hard || cachedAwards.length == 0) reloadAwards();
 		
 		return cachedAwards;
 	}
@@ -152,20 +140,16 @@ class GameFlags
 		return unlocked;
 	}
 	
-	static function parseCSV(raw:Dynamic, sanitizeSongName:Bool):Array<String>
+	static function parseCSV(?raw:String):Array<String>
 	{
-		final values:Array<String> = [];
-		if (raw == null) return values;
+		if (raw == null) return [];
 		
-		for (entry in Std.string(raw).split(','))
+		return [for (entry in raw.split(','))
 		{
-			var trimmed = entry.trim();
-			if (trimmed.length == 0) continue;
-			if (sanitizeSongName) trimmed = Paths.sanitize(trimmed.toLowerCase());
-			if (!values.contains(trimmed)) values.push(trimmed);
-		}
-		
-		return values;
+			final trimmed:String = entry.trim();
+			
+			if (trimmed.length > 0) trimmed;
+		}];
 	}
 	
 	public static function hasFlag(id:String)

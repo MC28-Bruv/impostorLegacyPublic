@@ -24,19 +24,9 @@ import flixel.util.FlxAxes;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxSpriteUtil;
 
-typedef Achievement =
-{
-	var name:String;
-	var hidden:Bool;
-	var ?icon:String;
-	var ?displayName:String;
-	var ?displayHint:String;
-	var ?displayDesc:String;
-}
-
 class AwardsState extends AmongUIState
 {
-	var achievements:Array<Achievement> = [];
+	var achievements:Array<GameFlags.AwardEntry> = [];
 	var nameText:FlxText;
 	var infoText:FlxText;
 	var completionText:FlxText;
@@ -58,33 +48,24 @@ class AwardsState extends AmongUIState
 	function loadAchievements()
 	{
 		achievements = [];
-		for (award in GameFlags.getAwards())
+		
+		for (award in GameFlags.getAwards(true))
 		{
-			achievements.push(
-				{
-					name: award.id,
-					icon: award.icon,
-					displayName: award.title,
-					displayHint: award.hint,
-					displayDesc: award.desc,
-					hidden: award.hidden
-				});
+			achievements.push(award);
 		}
 		
 		if (achievements.length <= 0)
 		{
 			achievements = [
 				{
-					name: 'week1',
-					hidden: false
-				},
-				{
-					name: 'week2',
-					hidden: false
-				},
-				{
-					name: 'week3',
-					hidden: false
+					id: 'week1',
+					icon: 'week1',
+					title: 'Hello',
+					hint: 'You shouldnt be seeing this',
+					desc: 'You shouldnt be seeing this',
+					hidden: false,
+					weeks: ['week1'],
+					songs: []
 				}
 			];
 		}
@@ -112,8 +93,8 @@ class AwardsState extends AmongUIState
 		var yAdd = 0;
 		for (i in 0...achievements.length)
 		{
-			final unlocked = ownAchievement(i);
-			var iconName:String = achievements[i].icon ?? GameFlags.getAchievementIcon(achievements[i].name);
+			final unlocked = GameFlags.hasAchievement(achievements[i].id);
+			var iconName:String = achievements[i].icon;
 			if (!unlocked || !Paths.fileExists('images/awards/$iconName.png')) iconName = 'blank';
 			var img:FlxSprite = new FlxSprite(85 + (xAdd * 165), 30 + (yAdd * 130)).loadGraphic(Paths.image('awards/$iconName'));
 			img.setGraphicSize(120, 120);
@@ -191,7 +172,7 @@ class AwardsState extends AmongUIState
 		refreshIconAlphas();
 		
 		final selected = achievements[curSel];
-		final unlocked = ownAchievement(curSel);
+		final unlocked = GameFlags.hasAchievement(selected.id);
 		nameText.color = unlocked ? 0xFFFFE066 : FlxColor.WHITE;
 		
 		if (selected.hidden && !unlocked)
@@ -201,20 +182,15 @@ class AwardsState extends AmongUIState
 		}
 		else
 		{
-			nameText.text = Lang.str('AWARDNAME_${selected.name}', selected.displayName ?? selected.name);
+			nameText.text = Lang.str('AWARDNAME_${selected.id}', selected.title);
 			
-			final awardDesc = Lang.str('AWARDBIO_${selected.name}', selected.displayDesc ?? '');
-			var awardHint = Lang.str('AWARDHINT_${selected.name}', selected.displayHint ?? '');
-			if (awardHint == null || awardHint.trim().length == 0) awardHint = selected.displayHint;
+			final awardDesc = Lang.str('AWARDBIO_${selected.id}', selected.desc);
+			var awardHint = Lang.str('AWARDHINT_${selected.id}', selected.hint);
+			if (awardHint == null || awardHint.trim().length == 0) awardHint = selected.hint;
 			if (awardHint == null || awardHint.trim().length == 0) awardHint = awardDesc;
 			
 			infoText.text = unlocked ? awardDesc : awardHint;
 		}
-	}
-	
-	function ownAchievement(i:Int):Bool
-	{
-		return GameFlags.hasAchievement(achievements[i].name);
 	}
 	
 	function refreshIconAlphas():Void
