@@ -254,6 +254,7 @@ class FreeplayCard extends FlxSpriteGroup
 	public override function kill():Void
 	{
 		curScript?.executeFunc('onDestroy', [], this);
+		curScript?.destroy();
 		curScript = null;
 		
 		super.kill();
